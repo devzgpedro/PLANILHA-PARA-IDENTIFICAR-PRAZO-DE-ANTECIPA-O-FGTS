@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planilha FGTS</title>
+
+  <style>
+    body {
+      font-family: Verdana, sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      padding: 60px;
+    }
+
+    .container {
+      background-color: white;
+      padding: 150px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 800px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-right: 30px;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      background-color: #007bff;
+      color: rgb(255, 255, 255);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover { background-color: #0056b3; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th { background-color: #f0f0f0; }
+
+    .verde { background-color: green; color: white; }
+    .amarelo { background-color: yellow; color: black; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Planilha de Clientes FGTS</h1>
+    <input type="text" id="nameInput" placeholder="Digite o nome do cliente" />
+    <button onclick="adicionarCliente()">Adicionar</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nome do Cliente</th>
+          <th>Data de Cadastro</th>
+          <th>Dias Restantes</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaClientes"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const MS_30_DIAS = 30 * 24 * 60 * 60 * 1000;
+
+    function adicionarCliente() {
+      const input = document.getElementById("nameInput");
+      const nome = input.value.trim();
+      if (!nome) return alert("Digite um nome!");
+
+      const agora = Date.now();
+      const tabela = document.getElementById("tabelaClientes");
+
+      const linha = document.createElement("tr");
+
+      // Nome
+      const tdNome = document.createElement("td");
+      tdNome.textContent = nome;
+
+      // Data
+      const tdData = document.createElement("td");
+      tdData.textContent = new Date(agora).toLocaleDateString("pt-BR");
+
+      // Dias restantes
+      const tdDias = document.createElement("td");
+      tdDias.dataset.dataCadastro = agora;
+      atualizarDias(tdDias);
+
+      // Status
+      const tdStatus = document.createElement("td");
+      tdStatus.classList.add("verde");
+      tdStatus.textContent = "Ativo";
+
+      linha.appendChild(tdNome);
+      linha.appendChild(tdData);
+      linha.appendChild(tdDias);
+      linha.appendChild(tdStatus);
+
+      tabela.appendChild(linha);
+
+      input.value = "";
+      input.style.backgroundColor = "green";
+      input.style.color = "white";
+
+      // Atualiza status depois de 30 dias
+      setTimeout(() => {
+        tdStatus.classList.remove("verde");
+        tdStatus.classList.add("amarelo");
+        tdStatus.textContent = "PAGO";
+      }, MS_30_DIAS);
+    }
+
+    // Atualiza os dias restantes
+    function atualizarDias(td) {
+      setInterval(() => {
+        const dataCadastro = Number(td.dataset.dataCadastro);
+        const agora = Date.now();
+        const restante = Math.max(0, Math.ceil((MS_30_DIAS - (agora - dataCadastro)) / (1000 * 60 * 60 * 24)));
+        td.textContent = restante + " dias";
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
